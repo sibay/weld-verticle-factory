@@ -1,0 +1,64 @@
+apply plugin: 'signing'
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+ext.ossrhUsername = project.hasProperty("ossrhUsername") ? ossrhUsername : ""
+ext.ossrhPassword = project.hasProperty("ossrhPassword") ? ossrhPassword : ""
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+            
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+               authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+              authentication(userName: ossrhUsername, password: ossrhPassword)
+            }            
+            pom.project {
+                name pomName
+                description pomDescription
+                url "https://github.com/$githubUser/$githubRepo"
+                scm {
+                    url "https://github.com/$githubUser/$githubRepo"
+                    developerConnection "scm:git:git@github.com:$githubUser/${githubRepo}.git"
+                    connection "scm:git:git@github.com:$githubUser/${githubRepo}.git"
+                }
+                licenses {
+                    license {
+                        name 'The MIT License'
+                        url 'http://www.opensource.org/licenses/mit-license.php'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                      id 'sibay'
+                      name 'Tarek El-Sibay'
+                      email 't.elsibay@notizwerk.de'
+                    }
+                }
+            }
+        }
+    }
+}
+

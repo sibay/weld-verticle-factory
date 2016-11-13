@@ -1,21 +1,19 @@
 plugins {
   id 'com.github.johnrengelman.shadow' version '1.2.3'
-  id 'org.ajoberstar.grgit' version '1.6.0'
 }
 
 apply plugin: 'java'
-apply plugin: 'org.ajoberstar.grgit'
+apply plugin: 'maven'
+apply from : "gradle/sonatype.gradle"
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-// NetBeans will automatically add "run" and "debug" tasks relying on the
-// "mainClass" property. You may however define the property prior executing
-// tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
-//
-// Note however, that you may define your own "run" and "debug" task if you
-// prefer. In this case NetBeans will not add these tasks but you may rely on
-// your own implementation.
+group = "de.notizwerk"
+version = "1.0.0-SNAPSHOT"
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+// NetBeans stuff
 if (!hasProperty('mainClass')) {
     ext.mainClass = ''
 }
@@ -25,29 +23,41 @@ repositories {
     mavenLocal()
 }
 
-version = "0.1-${grgit.head().abbreviatedId}"
-
-
-def vertxVersion = '3.3.3'
 dependencies {
     compile "io.vertx:vertx-core:$vertxVersion"
-    compile "javax.enterprise:cdi-api:1.2"
-    compile group: 'org.slf4j',      name: 'slf4j-api', version: '1.7.21'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
-    
+    compile "org.jboss.weld.se:weld-se-core:2.4.0.Final"
     testCompile group: 'junit', name: 'junit', version: '4.10'
 }
 
+jar {    
+    exclude (["de/notizwerk/weldcdi/examples/","**/*logging.properties"])
+    manifest {
+        attributes 'Weld-Verticle-Factory-Version': version
+    }  
+}
+
+// only for packaging the examples as runnable jar and test them on the console
 shadowJar {
     mergeServiceFiles()
     manifest {
-        attributes 'Main-Class': 'de.notizwerk.Bootstrap'
-        attributes 'Weld-Vertx-Version':version 
+        attributes 'Main-Class': 'de.notizwerk.weldcdi.examples.Bootstrap'
     } 
 }
 
-tasks.shadowJar.doFirst {
-        //version = version+'-'+ (int)(new Date().getTime()*0.001)
-        println "shadowJar " + version
-        tasks.shadowJar.manifest.attributes.'Weld-Vertx-Version'=version
+// utility
+task resolveSources << {
+    def componentIds = configurations.compile.incoming.resolutionResult.allDependencies.collect { it.selected.id }
+
+    def result = dependencies.createArtifactResolutionQuery()
+        .forComponents(componentIds)
+        .withArtifacts(JvmLibrary, SourcesArtifact, JavadocArtifact)
+        .execute()
+
+    for (component in result.resolvedComponents) {
+        component.getArtifacts(SourcesArtifact).each { println "Source artifact for ${component.id}: ${it.file}" }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.1'
 }
