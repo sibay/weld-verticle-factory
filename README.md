@@ -1,4 +1,4 @@
-# Weld CDI Verticle Factory
+# Weld CDI Vert.x Verticle Factory
 
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://doge.mit-license.org)
 
