@@ -2,7 +2,7 @@
 
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://doge.mit-license.org)
 
-A vert.x verticle factory with dependency injection based on weld CDI.
+A vert.x verticle factory with dependency injection based on weld CDI. Verticles created by this factory get their dependencies injected.
 
 ## Installation
 
@@ -37,6 +37,15 @@ System.setProperty(WeldVerticleFactory.SCANNED_PACKAGES_PROP,"de.notizwerk.weldc
 System.setProperty(WeldVerticleFactory.RECURSIVE_SCAN_PROP,"true"); // is true by default
 Vertx vertx = Vertx.vertx();
 vertx.deployVerticle("wcdi:de.notizwerk.weldcdi.examples.MapperVerticle");
+```
+
+The created verticles can annotate their dependencies with CDI annotations like `@Inject`. These properties are then injected by the factory.
+```java
+public class MapperVerticle extends AbstractVerticle {
+    @Inject
+    private Mapper mappper;
+    ...
+ }
 ```
 
 
