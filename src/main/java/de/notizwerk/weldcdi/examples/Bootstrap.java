@@ -63,6 +63,7 @@ public class Bootstrap {
         });
         
         CompositeFuture.all(completion1,completion2).setHandler( v -> {
+            logger.info("ignore the following \"Result is already complete: succeeded\" exceptions!");
             vertx.close();  
         });
     }
