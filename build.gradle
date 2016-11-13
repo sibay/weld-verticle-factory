@@ -10,7 +10,7 @@ sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 group = "de.notizwerk"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 // NetBeans stuff
