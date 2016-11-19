@@ -26,12 +26,12 @@ compile 'de.notizwerk:weld-verticle-factory:1.0.0'
 
 Include the jar in your classpath and deploy your verticle with the ```wcdi``` prefix. To setup the weld container correctly you must provide
 the packages which should be scanned for beans and _cdi'ed_ verticles. To do that set the system property 
+```
+vertx-weld-cdi-scanned-package-classes
+```
+to a comma separated list of class names (like _"org.myorg.verticles.FirstVerticle, org.myorg.beans.MyBean"_)  The packages in which the classes reside, are scanned recursively fo beans. Disable the recursion with ```-Dvertx-weld-cdi-recursive-scan=false``` 
 
-```vertx-weld-cdi-scanned-package-classes```
-
-to a comma separated list of class names (like _"org.myorg.verticles.FirstVerticle,org.myorg.beans.MyBean"_)  The packages in which the classes reside, are scanned recursively fo beans. Disable the recursion with ```-Dvertx-weld-cdi-recursive-scan=false``` 
-
-Here a short bootstrap example:
+Here is a short bootstrap example:
 ```java
 System.setProperty(WeldVerticleFactory.SCANNED_PACKAGES_PROP,"de.notizwerk.weldcdi.examples.Bootstrap");
 System.setProperty(WeldVerticleFactory.RECURSIVE_SCAN_PROP,"true"); // is true by default
